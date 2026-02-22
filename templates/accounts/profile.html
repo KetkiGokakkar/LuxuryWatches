@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block title %}My Profile — LuxWatch{% endblock %}
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1>My <em>Account</em></h1>
+        <p>Welcome, {{ user.first_name|default:user.username }}</p>
+    </div>
+</section>
+<section class="section">
+    <div class="container">
+        <div class="profile-layout">
+            <div class="profile-sidebar">
+                <div class="profile-avatar">{{ user.username|first|upper }}</div>
+                <h3>{{ user.get_full_name|default:user.username }}</h3>
+                <p>{{ user.email }}</p>
+                <nav class="profile-nav">
+                    <a href="{% url 'accounts:profile' %}" class="active"><i class="fas fa-user"></i> Profile</a>
+                    <a href="{% url 'cart:order_history' %}"><i class="fas fa-box"></i> Orders</a>
+                    <a href="{% url 'accounts:logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </nav>
+            </div>
+            <div class="profile-main">
+                <div class="profile-section">
+                    <h2>Profile Details</h2>
+                    <form method="POST" class="profile-form">
+                        {% csrf_token %}
+                        {% for field in form %}
+                        <div class="form-group">
+                            <label>{{ field.label }}</label>
+                            {{ field }}
+                        </div>
+                        {% endfor %}
+                        <button type="submit" class="btn btn-gold">Save Changes</button>
+                    </form>
+                </div>
+                <div class="profile-section">
+                    <div class="section-head-row">
+                        <h2>Saved Addresses</h2>
+                        <a href="{% url 'accounts:add_address' %}" class="btn btn-outline btn-sm"><i
+                                class="fas fa-plus"></i> Add Address</a>
+                    </div>
+                    {% if addresses %}
+                    <div class="address-grid">
+                        {% for addr in addresses %}
+                        <div class="address-card {% if addr.is_default %}address-default{% endif %}">
+                            {% if addr.is_default %}<span class="address-badge">Default</span>{% endif %}
+                            <h4>{{ addr.full_name }}</h4>
+                            <p>{{ addr.address_line1 }}{% if addr.address_line2 %}, {{ addr.address_line2 }}{% endif %}
+                            </p>
+                            <p>{{ addr.city }}, {{ addr.state }} - {{ addr.postal_code }}</p>
+                            <p>{{ addr.country }}</p>
+                            <p><i class="fas fa-phone"></i> {{ addr.phone }}</p>
+                            <div class="address-actions">
+                                <a href="{% url 'accounts:edit_address' addr.pk %}" class="btn-link">Edit</a>
+                                <a href="{% url 'accounts:delete_address' addr.pk %}" class="btn-link btn-danger"
+                                    onclick="return confirm('Delete this address?')">Delete</a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No saved addresses. Add one for faster checkout.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

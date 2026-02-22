@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Order History — LuxWatch{% endblock %}
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1>My <em>Orders</em></h1>
+    </div>
+</section>
+<section class="section">
+    <div class="container">
+        {% if orders %}
+        <div class="orders-list">
+            {% for order in orders %}
+            <div class="order-card">
+                <div class="order-card-header">
+                    <div>
+                        <span class="order-number">{{ order.order_number }}</span>
+                        <span class="order-date">{{ order.created_at|date:"M d, Y" }}</span>
+                    </div>
+                    <span class="status-badge status-{{ order.status }}">{{ order.get_status_display }}</span>
+                </div>
+                <div class="order-card-items">
+                    {% for item in order.items.all %}
+                    <div class="order-item-row">
+                        <span>{{ item.watch_brand }} {{ item.watch_name }} × {{ item.quantity }}</span>
+                        <span>₹{{ item.line_total|floatformat:0|intcomma }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="order-card-footer">
+                    <span class="order-total">Total: <strong>₹{{ order.total|floatformat:0|intcomma }}</strong></span>
+                    <a href="{% url 'cart:order_detail' order.order_number %}" class="btn btn-outline btn-sm">View
+                        Details</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-box-open"></i>
+            <h3>No orders yet</h3>
+            <p>Start shopping to see your order history here.</p>
+            <a href="{% url 'store:watch_list' %}" class="btn btn-gold">Shop Now</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

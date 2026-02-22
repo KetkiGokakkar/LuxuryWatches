@@ -1,0 +1,155 @@
+{% load static %}
+{% load store_tags %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="LuxWatch — Curated collection of the world's finest luxury timepieces. Rolex, Patek Philippe, Audemars Piguet & more.">
+    <title>{% block title %}LuxWatch — Premium Luxury Watches{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Announcement Bar -->
+    <div class="announcement-bar">
+        <p><i class="fas fa-gem"></i> Free Worldwide Shipping on Orders Over ₹5,00,000 &nbsp;|&nbsp; Authenticity Guaranteed &nbsp;|&nbsp; 2-Year Warranty <i class="fas fa-gem"></i></p>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <button class="mobile-toggle" id="mobileToggle" aria-label="Menu">
+                <span></span><span></span><span></span>
+            </button>
+
+            <a href="{% url 'store:home' %}" class="nav-logo">
+                <i class="fas fa-crown"></i>
+                <span>Lux<em>Watch</em></span>
+            </a>
+
+            <div class="nav-links" id="navLinks">
+                <a href="{% url 'store:home' %}">Home</a>
+                <a href="{% url 'store:watch_list' %}">Collections</a>
+                <div class="nav-dropdown">
+                    <a href="#">Brands <i class="fas fa-chevron-down"></i></a>
+                    <div class="dropdown-content">
+                        <a href="{% url 'store:watch_list' %}?brand=rolex">Rolex</a>
+                        <a href="{% url 'store:watch_list' %}?brand=patek-philippe">Patek Philippe</a>
+                        <a href="{% url 'store:watch_list' %}?brand=audemars-piguet">Audemars Piguet</a>
+                        <a href="{% url 'store:watch_list' %}?brand=omega">Omega</a>
+                        <a href="{% url 'store:watch_list' %}?brand=tag-heuer">TAG Heuer</a>
+                        <a href="{% url 'store:watch_list' %}">View All</a>
+                    </div>
+                </div>
+                <div class="nav-dropdown">
+                    <a href="#">Categories <i class="fas fa-chevron-down"></i></a>
+                    <div class="dropdown-content">
+                        {% for cat in all_categories %}
+                        <a href="{% url 'store:watch_list' %}?category={{ cat.slug }}">{{ cat.name }}</a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="nav-actions">
+                <form action="{% url 'store:search' %}" method="GET" class="search-form" id="searchForm">
+                    <input type="text" name="q" placeholder="Search watches..." class="search-input" id="searchInput">
+                    <button type="submit" class="search-btn"><i class="fas fa-search"></i></button>
+                </form>
+
+                {% if user.is_authenticated %}
+                <div class="nav-dropdown">
+                    <a href="#" class="nav-icon"><i class="fas fa-user"></i></a>
+                    <div class="dropdown-content dropdown-right">
+                        <a href="{% url 'accounts:profile' %}"><i class="fas fa-user-circle"></i> My Account</a>
+                        <a href="{% url 'cart:order_history' %}"><i class="fas fa-box"></i> Orders</a>
+                        <a href="{% url 'accounts:logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </div>
+                {% else %}
+                <a href="{% url 'accounts:login' %}" class="nav-icon" title="Login"><i class="fas fa-user"></i></a>
+                {% endif %}
+
+                <a href="{% url 'cart:cart' %}" class="nav-icon cart-icon">
+                    <i class="fas fa-shopping-bag"></i>
+                    {% if cart_count > 0 %}
+                    <span class="cart-badge" id="cartBadge">{{ cart_count }}</span>
+                    {% endif %}
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="messages-container">
+        {% for message in messages %}
+        <div class="message message-{{ message.tags }}">
+            <span>{{ message }}</span>
+            <button class="message-close" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-top">
+            <div class="container">
+                <div class="footer-grid">
+                    <div class="footer-col footer-brand">
+                        <a href="{% url 'store:home' %}" class="footer-logo">
+                            <i class="fas fa-crown"></i> Lux<em>Watch</em>
+                        </a>
+                        <p>Curating the world's finest timepieces since 2024. Every watch tells a story of exceptional craftsmanship and timeless elegance.</p>
+                        <div class="social-links">
+                            <a href="#"><i class="fab fa-instagram"></i></a>
+                            <a href="#"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                            <a href="#"><i class="fab fa-youtube"></i></a>
+                        </div>
+                    </div>
+                    <div class="footer-col">
+                        <h4>Quick Links</h4>
+                        <a href="{% url 'store:watch_list' %}">All Watches</a>
+                        <a href="{% url 'store:watch_list' %}?sort=newest">New Arrivals</a>
+                        <a href="{% url 'store:watch_list' %}?sort=price_high">Premium Collection</a>
+                        <a href="#">About Us</a>
+                    </div>
+                    <div class="footer-col">
+                        <h4>Customer Care</h4>
+                        <a href="#">Contact Us</a>
+                        <a href="#">Shipping & Returns</a>
+                        <a href="#">FAQs</a>
+                        <a href="#">Warranty</a>
+                    </div>
+                    <div class="footer-col">
+                        <h4>Contact</h4>
+                        <p><i class="fas fa-map-marker-alt"></i> Mumbai, Maharashtra, India</p>
+                        <p><i class="fas fa-envelope"></i> hello@luxwatch.com</p>
+                        <p><i class="fas fa-phone"></i> +91 98765 43210</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="container">
+                <p>&copy; 2024 LuxWatch. All rights reserved. | 100% Authentic Timepieces</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

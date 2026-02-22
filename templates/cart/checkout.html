@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load store_tags %}
+{% load humanize %}
+
+{% block title %}Checkout — LuxWatch{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1>Secure <em>Checkout</em></h1>
+        <div class="checkout-steps">
+            <span class="step active"><i class="fas fa-shopping-bag"></i> Cart</span>
+            <span class="step-line"></span>
+            <span class="step active"><i class="fas fa-map-marker-alt"></i> Address</span>
+            <span class="step-line"></span>
+            <span class="step"><i class="fas fa-check-circle"></i> Confirm</span>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <form method="POST" class="checkout-layout">
+            {% csrf_token %}
+            <div class="checkout-main">
+                <h2><i class="fas fa-map-marker-alt"></i> Select Delivery Address</h2>
+                {% if addresses %}
+                <div class="address-grid">
+                    {% for addr in addresses %}
+                    <label class="address-select-card">
+                        <input type="radio" name="address_id" value="{{ addr.pk }}" {% if addr.is_default %}checked{%
+                            endif %}>
+                        <div class="address-content">
+                            {% if addr.is_default %}<span class="address-badge">Default</span>{% endif %}
+                            <h4>{{ addr.full_name }}</h4>
+                            <p>{{ addr.address_line1 }}{% if addr.address_line2 %}, {{ addr.address_line2 }}{% endif %}
+                            </p>
+                            <p>{{ addr.city }}, {{ addr.state }} - {{ addr.postal_code }}</p>
+                            <p><i class="fas fa-phone"></i> {{ addr.phone }}</p>
+                        </div>
+                    </label>
+                    {% endfor %}
+                </div>
+                <a href="{% url 'accounts:add_address' %}" class="btn btn-outline btn-sm" style="margin-top:15px;"><i
+                        class="fas fa-plus"></i> Add New Address</a>
+                {% else %}
+                <div class="empty-state" style="padding:30px 0;">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <h3>No saved addresses</h3>
+                    <p>Please add an address to continue.</p>
+                    <a href="{% url 'accounts:add_address' %}" class="btn btn-gold"><i class="fas fa-plus"></i> Add
+                        Address</a>
+                </div>
+                {% endif %}
+
+                <h2 style="margin-top:30px;"><i class="fas fa-credit-card"></i> Payment Method</h2>
+                <div class="payment-options">
+                    <label class="payment-option selected">
+                        <input type="radio" name="payment" value="cod" checked>
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span>Cash on Delivery</span>
+                    </label>
+                    <label class="payment-option">
+                        <input type="radio" name="payment" value="upi">
+                        <i class="fas fa-mobile-alt"></i>
+                        <span>UPI Payment</span>
+                    </label>
+                    <label class="payment-option">
+                        <input type="radio" name="payment" value="card">
+                        <i class="fas fa-credit-card"></i>
+                        <span>Credit/Debit Card</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="cart-summary">
+                <h3>Order Summary</h3>
+                {% for item in items %}
+                <div class="summary-item">
+                    <span>{{ item.watch.brand.name }} {{ item.watch.name }} × {{ item.quantity }}</span>
+                    <span>₹{{ item.line_total|floatformat:0|intcomma }}</span>
+                </div>
+                {% endfor %}
+                <div class="summary-divider"></div>
+                <div class="summary-row"><span>Subtotal</span><span>₹{{ cart.subtotal|floatformat:0|intcomma }}</span>
+                </div>
+                <div class="summary-row"><span>GST (18%)</span><span>₹{{ cart.tax|floatformat:0|intcomma }}</span></div>
+                <div class="summary-row"><span>Shipping</span><span class="text-gold">Free</span></div>
+                <div class="summary-divider"></div>
+                <div class="summary-row summary-total"><span>Total</span><span>₹{{ cart.total|floatformat:0|intcomma
+                        }}</span></div>
+                {% if addresses %}
+                <button type="submit" class="btn btn-gold btn-full btn-lg"><i class="fas fa-lock"></i> Place
+                    Order</button>
+                {% endif %}
+                <p class="checkout-note"><i class="fas fa-shield-alt"></i> Your order is protected by LuxWatch's
+                    authenticity guarantee</p>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

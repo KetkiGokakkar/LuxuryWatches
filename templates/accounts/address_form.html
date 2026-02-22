@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} — LuxWatch{% endblock %}
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1>{{ title }}</h1>
+    </div>
+</section>
+<section class="section">
+    <div class="container">
+        <div class="form-container">
+            <form method="POST" class="styled-form">
+                {% csrf_token %}
+                {% for field in form %}
+                <div class="form-group">
+                    <label>{{ field.label }}{% if field.field.required %} <span class="required">*</span>{% endif
+                        %}</label>
+                    {{ field }}
+                    {% if field.errors %}<span class="field-error">{{ field.errors.0 }}</span>{% endif %}
+                </div>
+                {% endfor %}
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-gold">Save Address</button>
+                    <a href="{% url 'accounts:profile' %}" class="btn btn-outline">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

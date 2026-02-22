@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Order {{ order.order_number }} — LuxWatch{% endblock %}
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1>Order <em>{{ order.order_number }}</em></h1>
+    </div>
+</section>
+<section class="section">
+    <div class="container">
+        <div class="order-detail-layout">
+            <div class="order-detail-main">
+                <div class="order-detail-card">
+                    <h3>Items</h3>
+                    {% for item in order.items.all %}
+                    <div class="confirm-item">
+                        <span>{{ item.watch_brand }} {{ item.watch_name }} × {{ item.quantity }}</span>
+                        <span>₹{{ item.line_total|floatformat:0|intcomma }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="order-detail-card">
+                    <h3>Shipping Address</h3>
+                    <p>{{ order.full_name }}<br>{{ order.address_line1 }}{% if order.address_line2 %}, {{
+                        order.address_line2 }}{% endif %}<br>{{ order.city }}, {{ order.state }} - {{ order.postal_code
+                        }}<br>{{ order.country }}<br><i class="fas fa-phone"></i> {{ order.phone }}</p>
+                </div>
+            </div>
+            <div class="cart-summary">
+                <h3>Order Summary</h3>
+                <div class="summary-row"><span>Status</span><span class="status-badge status-{{ order.status }}">{{
+                        order.get_status_display }}</span></div>
+                <div class="summary-row"><span>Date</span><span>{{ order.created_at|date:"M d, Y H:i" }}</span></div>
+                <div class="summary-divider"></div>
+                <div class="summary-row"><span>Subtotal</span><span>₹{{ order.subtotal|floatformat:0|intcomma }}</span>
+                </div>
+                <div class="summary-row"><span>Tax</span><span>₹{{ order.tax|floatformat:0|intcomma }}</span></div>
+                <div class="summary-row"><span>Shipping</span><span class="text-gold">Free</span></div>
+                <div class="summary-divider"></div>
+                <div class="summary-row summary-total"><span>Total</span><span>₹{{ order.total|floatformat:0|intcomma
+                        }}</span></div>
+                <a href="{% url 'cart:order_history' %}" class="btn btn-outline btn-full" style="margin-top:15px;">←
+                    Back to Orders</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

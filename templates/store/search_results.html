@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load store_tags %}
+{% load humanize %}
+
+{% block title %}Search: {{ query }} — LuxWatch{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1>Search Results</h1>
+        <p>{% if query %}Showing results for "<strong>{{ query }}</strong>"{% endif %}</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        {% if watches %}
+        <p class="result-count">{{ watches|length }} watches found</p>
+        <div class="watch-grid">
+            {% for watch in watches %}
+            <div class="watch-card">
+                <a href="{{ watch.get_absolute_url }}">
+                    <div class="watch-card-image">
+                        {% if watch.image %}
+                        <img src="{{ watch.image.url }}" alt="{{ watch.name }}" loading="lazy">
+                        {% else %}
+                        <div class="watch-placeholder"><i class="fas fa-clock"></i></div>
+                        {% endif %}
+                    </div>
+                </a>
+                <div class="watch-card-info">
+                    <span class="watch-brand">{{ watch.brand.name }}</span>
+                    <a href="{{ watch.get_absolute_url }}">
+                        <h3 class="watch-name">{{ watch.name }}</h3>
+                    </a>
+                    <div class="watch-price">
+                        <span class="price-current">₹{{ watch.price|floatformat:0|intcomma }}</span>
+                        {% if watch.original_price %}
+                        <span class="price-original">₹{{ watch.original_price|floatformat:0|intcomma }}</span>
+                        {% endif %}
+                    </div>
+                    <form method="POST" action="{% url 'cart:add_to_cart' watch.id %}" class="add-to-cart-form">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-add-cart"><i class="fas fa-shopping-bag"></i> Add to
+                            Cart</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-search"></i>
+            <h3>No results found</h3>
+            <p>We couldn't find any watches matching "{{ query }}". Try a different search term.</p>
+            <a href="{% url 'store:watch_list' %}" class="btn btn-gold">Browse All Watches</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

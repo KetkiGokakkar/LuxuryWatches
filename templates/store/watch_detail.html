@@ -1,0 +1,253 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load store_tags %}
+{% load humanize %}
+
+{% block title %}{{ watch.brand.name }} {{ watch.name }} — LuxWatch{% endblock %}
+
+{% block content %}
+<section class="section product-detail-section">
+    <div class="container">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="{% url 'store:home' %}">Home</a>
+            <span>/</span>
+            <a href="{% url 'store:watch_list' %}">Watches</a>
+            <span>/</span>
+            <a href="{% url 'store:watch_list' %}?brand={{ watch.brand.slug }}">{{ watch.brand.name }}</a>
+            <span>/</span>
+            <span>{{ watch.name }}</span>
+        </div>
+
+        <div class="product-layout">
+            <!-- Image Gallery -->
+            <div class="product-gallery">
+                <div class="gallery-main">
+                    {% if watch.image %}
+                    <img src="{{ watch.image.url }}" alt="{{ watch.name }}" id="mainImage">
+                    {% else %}
+                    <div class="watch-placeholder-lg"><i class="fas fa-clock"></i></div>
+                    {% endif %}
+                </div>
+                {% if watch.image_2 or watch.image_3 %}
+                <div class="gallery-thumbs">
+                    {% if watch.image %}
+                    <img src="{{ watch.image.url }}" alt="View 1" class="thumb active" onclick="changeImage(this)">
+                    {% endif %}
+                    {% if watch.image_2 %}
+                    <img src="{{ watch.image_2.url }}" alt="View 2" class="thumb" onclick="changeImage(this)">
+                    {% endif %}
+                    {% if watch.image_3 %}
+                    <img src="{{ watch.image_3.url }}" alt="View 3" class="thumb" onclick="changeImage(this)">
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Product Info -->
+            <div class="product-info">
+                <span class="product-brand">{{ watch.brand.name }}</span>
+                <h1 class="product-title">{{ watch.name }}</h1>
+
+                {% if watch.avg_rating > 0 %}
+                <div class="product-rating">
+                    {% for i in watch.avg_rating|star_range %}<i class="fas fa-star"></i>{% endfor %}
+                    {% for i in watch.avg_rating|empty_star_range %}<i class="far fa-star"></i>{% endfor %}
+                    <span class="rating-text">{{ watch.avg_rating }} ({{ watch.review_count }} reviews)</span>
+                </div>
+                {% endif %}
+
+                <div class="product-price-block">
+                    <span class="product-price">₹{{ watch.price|floatformat:0|intcomma }}</span>
+                    {% if watch.original_price %}
+                    <span class="product-original-price">₹{{ watch.original_price|floatformat:0|intcomma }}</span>
+                    <span class="product-discount">{{ watch.discount_percentage }}% OFF</span>
+                    {% endif %}
+                    <p class="price-note">Inclusive of all taxes</p>
+                </div>
+
+                <p class="product-desc">{{ watch.description }}</p>
+
+                <div class="product-stock">
+                    {% if watch.in_stock %}
+                    <span class="in-stock"><i class="fas fa-check-circle"></i> In Stock ({{ watch.stock }}
+                        available)</span>
+                    {% else %}
+                    <span class="out-of-stock"><i class="fas fa-times-circle"></i> Out of Stock</span>
+                    {% endif %}
+                </div>
+
+                {% if watch.in_stock %}
+                <form method="POST" action="{% url 'cart:add_to_cart' watch.id %}" class="product-actions">
+                    {% csrf_token %}
+                    <div class="quantity-selector">
+                        <button type="button" onclick="changeQty(-1)">−</button>
+                        <input type="number" name="quantity" value="1" min="1" max="{{ watch.stock }}" id="qtyInput">
+                        <button type="button" onclick="changeQty(1)">+</button>
+                    </div>
+                    <button type="submit" class="btn btn-gold btn-lg btn-full">
+                        <i class="fas fa-shopping-bag"></i> Add to Cart
+                    </button>
+                </form>
+                {% endif %}
+
+                <div class="product-meta">
+                    <div class="meta-item"><i class="fas fa-truck"></i> Free shipping on orders over ₹5,00,000</div>
+                    <div class="meta-item"><i class="fas fa-shield-alt"></i> 2-Year international warranty</div>
+                    <div class="meta-item"><i class="fas fa-certificate"></i> Certificate of authenticity included</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Specifications -->
+        <div class="product-specs-section">
+            <h2 class="specs-title">Technical <em>Specifications</em></h2>
+            <div class="specs-grid">
+                {% if watch.reference_number %}
+                <div class="spec-item"><span class="spec-label">Reference</span><span class="spec-value">{{
+                        watch.reference_number }}</span></div>
+                {% endif %}
+                {% if watch.movement %}
+                <div class="spec-item"><span class="spec-label">Movement</span><span class="spec-value">{{
+                        watch.movement }}</span></div>
+                {% endif %}
+                {% if watch.case_material %}
+                <div class="spec-item"><span class="spec-label">Case Material</span><span class="spec-value">{{
+                        watch.case_material }}</span></div>
+                {% endif %}
+                {% if watch.case_diameter %}
+                <div class="spec-item"><span class="spec-label">Case Diameter</span><span class="spec-value">{{
+                        watch.case_diameter }}</span></div>
+                {% endif %}
+                {% if watch.dial_color %}
+                <div class="spec-item"><span class="spec-label">Dial Color</span><span class="spec-value">{{
+                        watch.dial_color }}</span></div>
+                {% endif %}
+                {% if watch.crystal %}
+                <div class="spec-item"><span class="spec-label">Crystal</span><span class="spec-value">{{ watch.crystal
+                        }}</span></div>
+                {% endif %}
+                {% if watch.water_resistance %}
+                <div class="spec-item"><span class="spec-label">Water Resistance</span><span class="spec-value">{{
+                        watch.water_resistance }}</span></div>
+                {% endif %}
+                {% if watch.strap_material %}
+                <div class="spec-item"><span class="spec-label">Strap/Bracelet</span><span class="spec-value">{{
+                        watch.strap_material }}</span></div>
+                {% endif %}
+                {% if watch.power_reserve %}
+                <div class="spec-item"><span class="spec-label">Power Reserve</span><span class="spec-value">{{
+                        watch.power_reserve }}</span></div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Reviews -->
+        <div class="reviews-section">
+            <h2 class="specs-title">Customer <em>Reviews</em></h2>
+
+            {% if reviews %}
+            <div class="reviews-list">
+                {% for review in reviews %}
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="review-user">
+                            <div class="review-avatar">{{ review.user.username|first|upper }}</div>
+                            <div>
+                                <strong>{{ review.user.get_full_name|default:review.user.username }}</strong>
+                                <div class="review-stars">
+                                    {% for i in review.rating|star_range %}<i class="fas fa-star"></i>{% endfor %}
+                                    {% for i in review.rating|empty_star_range %}<i class="far fa-star"></i>{% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        <span class="review-date">{{ review.created_at|date:"M d, Y" }}</span>
+                    </div>
+                    <h4 class="review-title">{{ review.title }}</h4>
+                    <p class="review-comment">{{ review.comment }}</p>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="no-reviews">No reviews yet. Be the first to share your experience!</p>
+            {% endif %}
+
+            {% if user.is_authenticated and not user_reviewed %}
+            <div class="review-form-wrapper">
+                <h3>Write a Review</h3>
+                <form method="POST" action="{% url 'store:add_review' watch.slug %}" id="reviewForm">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label>Rating</label>
+                        <div class="star-select">
+                            {% for i in "12345" %}
+                            <input type="radio" name="rating" value="{{ i }}" id="star{{ i }}">
+                            <label for="star{{ i }}"><i class="fas fa-star"></i></label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Title</label>
+                        <input type="text" name="title" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Your Review</label>
+                        <textarea name="comment" class="form-input" rows="4" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-gold">Submit Review</button>
+                </form>
+            </div>
+            {% elif not user.is_authenticated %}
+            <p class="login-to-review"><a href="{% url 'accounts:login' %}?next={{ request.path }}">Login</a> to write a
+                review.</p>
+            {% endif %}
+        </div>
+
+        <!-- Related Watches -->
+        {% if related %}
+        <div class="related-section">
+            <h2 class="specs-title">You May Also <em>Like</em></h2>
+            <div class="watch-grid">
+                {% for w in related %}
+                <div class="watch-card">
+                    <a href="{{ w.get_absolute_url }}">
+                        <div class="watch-card-image">
+                            {% if w.image %}
+                            <img src="{{ w.image.url }}" alt="{{ w.name }}" loading="lazy">
+                            {% else %}
+                            <div class="watch-placeholder"><i class="fas fa-clock"></i></div>
+                            {% endif %}
+                        </div>
+                    </a>
+                    <div class="watch-card-info">
+                        <span class="watch-brand">{{ w.brand.name }}</span>
+                        <a href="{{ w.get_absolute_url }}">
+                            <h3 class="watch-name">{{ w.name }}</h3>
+                        </a>
+                        <div class="watch-price">
+                            <span class="price-current">₹{{ w.price|floatformat:0|intcomma }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<script>
+    function changeImage(el) {
+        document.getElementById('mainImage').src = el.src;
+        document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+    }
+    function changeQty(delta) {
+        const input = document.getElementById('qtyInput');
+        let val = parseInt(input.value) + delta;
+        if (val < 1) val = 1;
+        if (val > parseInt(input.max)) val = parseInt(input.max);
+        input.value = val;
+    }
+</script>
+{% endblock %}

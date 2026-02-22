@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load store_tags %}
+{% load humanize %}
+
+{% block title %}LuxWatch — World's Finest Luxury Watches{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+        <span class="hero-subtitle animate-fade-in">Curated Excellence</span>
+        <h1 class="hero-title animate-fade-in">Timeless <em>Luxury</em><br>On Your Wrist</h1>
+        <p class="hero-desc animate-fade-in">Discover an exclusive collection of the world's most prestigious timepieces
+            — crafted by masters, curated for connoisseurs.</p>
+        <div class="hero-actions animate-fade-in">
+            <a href="{% url 'store:watch_list' %}" class="btn btn-gold">Explore Collection</a>
+            <a href="{% url 'store:watch_list' %}?sort=newest" class="btn btn-outline">New Arrivals</a>
+        </div>
+    </div>
+    <div class="hero-stats animate-fade-in">
+        <div class="stat"><span class="stat-number">50+</span><span class="stat-label">Luxury Brands</span></div>
+        <div class="stat"><span class="stat-number">500+</span><span class="stat-label">Timepieces</span></div>
+        <div class="stat"><span class="stat-number">100%</span><span class="stat-label">Authentic</span></div>
+        <div class="stat"><span class="stat-number">24/7</span><span class="stat-label">Support</span></div>
+    </div>
+</section>
+
+<!-- Features Bar -->
+<section class="features-bar">
+    <div class="container">
+        <div class="features-grid">
+            <div class="feature-item">
+                <i class="fas fa-gem"></i>
+                <div>
+                    <h4>100% Authentic</h4>
+                    <p>Certified genuine timepieces</p>
+                </div>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-shipping-fast"></i>
+                <div>
+                    <h4>Free Shipping</h4>
+                    <p>On orders over ₹5L</p>
+                </div>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-shield-alt"></i>
+                <div>
+                    <h4>2-Year Warranty</h4>
+                    <p>Complete peace of mind</p>
+                </div>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-undo"></i>
+                <div>
+                    <h4>Easy Returns</h4>
+                    <p>30-day return policy</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Watches -->
+{% if featured %}
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Curated Selection</span>
+            <h2 class="section-title">Featured <em>Timepieces</em></h2>
+            <p class="section-desc">Handpicked by our master horologists for their exceptional craftsmanship and
+                timeless design.</p>
+        </div>
+        <div class="watch-grid">
+            {% for watch in featured %}
+            <div class="watch-card">
+                <a href="{{ watch.get_absolute_url }}">
+                    <div class="watch-card-image">
+                        {% if watch.image %}
+                        <img src="{{ watch.image.url }}" alt="{{ watch.name }}" loading="lazy">
+                        {% else %}
+                        <div class="watch-placeholder"><i class="fas fa-clock"></i></div>
+                        {% endif %}
+                        {% if watch.discount_percentage %}
+                        <span class="badge badge-sale">-{{ watch.discount_percentage }}%</span>
+                        {% endif %}
+                        {% if watch.is_new_arrival %}
+                        <span class="badge badge-new">New</span>
+                        {% endif %}
+                    </div>
+                </a>
+                <div class="watch-card-info">
+                    <span class="watch-brand">{{ watch.brand.name }}</span>
+                    <a href="{{ watch.get_absolute_url }}">
+                        <h3 class="watch-name">{{ watch.name }}</h3>
+                    </a>
+                    {% if watch.avg_rating > 0 %}
+                    <div class="watch-rating">
+                        {% for i in watch.avg_rating|star_range %}
+                        <i class="fas fa-star"></i>
+                        {% endfor %}
+                        {% for i in watch.avg_rating|empty_star_range %}
+                        <i class="far fa-star"></i>
+                        {% endfor %}
+                        <span>({{ watch.review_count }})</span>
+                    </div>
+                    {% endif %}
+                    <div class="watch-price">
+                        <span class="price-current">₹{{ watch.price|floatformat:0|intcomma }}</span>
+                        {% if watch.original_price %}
+                        <span class="price-original">₹{{ watch.original_price|floatformat:0|intcomma }}</span>
+                        {% endif %}
+                    </div>
+                    <form method="POST" action="{% url 'cart:add_to_cart' watch.id %}" class="add-to-cart-form">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-add-cart">
+                            <i class="fas fa-shopping-bag"></i> Add to Cart
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="section-cta">
+            <a href="{% url 'store:watch_list' %}" class="btn btn-outline">View All Watches <i
+                    class="fas fa-arrow-right"></i></a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Categories -->
+{% if categories %}
+<section class="section section-dark">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Browse By Style</span>
+            <h2 class="section-title">Shop by <em>Category</em></h2>
+        </div>
+        <div class="category-grid">
+            {% for cat in categories %}
+            <a href="{% url 'store:watch_list' %}?category={{ cat.slug }}" class="category-card">
+                <div class="category-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <h3>{{ cat.name }}</h3>
+                <span class="category-count">{{ cat.watches.count }} watches</span>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- New Arrivals -->
+{% if new_arrivals %}
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Just Landed</span>
+            <h2 class="section-title">New <em>Arrivals</em></h2>
+            <p class="section-desc">Be the first to explore our latest additions to the collection.</p>
+        </div>
+        <div class="watch-grid">
+            {% for watch in new_arrivals %}
+            <div class="watch-card">
+                <a href="{{ watch.get_absolute_url }}">
+                    <div class="watch-card-image">
+                        {% if watch.image %}
+                        <img src="{{ watch.image.url }}" alt="{{ watch.name }}" loading="lazy">
+                        {% else %}
+                        <div class="watch-placeholder"><i class="fas fa-clock"></i></div>
+                        {% endif %}
+                        <span class="badge badge-new">New</span>
+                    </div>
+                </a>
+                <div class="watch-card-info">
+                    <span class="watch-brand">{{ watch.brand.name }}</span>
+                    <a href="{{ watch.get_absolute_url }}">
+                        <h3 class="watch-name">{{ watch.name }}</h3>
+                    </a>
+                    <div class="watch-price">
+                        <span class="price-current">₹{{ watch.price|floatformat:0|intcomma }}</span>
+                        {% if watch.original_price %}
+                        <span class="price-original">₹{{ watch.original_price|floatformat:0|intcomma }}</span>
+                        {% endif %}
+                    </div>
+                    <form method="POST" action="{% url 'cart:add_to_cart' watch.id %}" class="add-to-cart-form">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-add-cart"><i class="fas fa-shopping-bag"></i> Add to
+                            Cart</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Brands Section -->
+{% if brands %}
+<section class="section section-dark">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Our Partners</span>
+            <h2 class="section-title">Prestigious <em>Brands</em></h2>
+        </div>
+        <div class="brands-grid">
+            {% for brand in brands %}
+            <a href="{% url 'store:watch_list' %}?brand={{ brand.slug }}" class="brand-card">
+                <div class="brand-icon"><i class="fas fa-crown"></i></div>
+                <h3>{{ brand.name }}</h3>
+                {% if brand.country %}<span>{{ brand.country }}</span>{% endif %}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="cta-overlay"></div>
+    <div class="cta-content">
+        <h2>Experience <em>Luxury</em> Like Never Before</h2>
+        <p>Join thousands of discerning collectors who trust LuxWatch for their premium timepiece needs.</p>
+        <a href="{% url 'accounts:register' %}" class="btn btn-gold btn-lg">Create Your Account</a>
+    </div>
+</section>
+{% endblock %}

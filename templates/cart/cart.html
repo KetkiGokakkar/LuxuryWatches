@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load store_tags %}
+{% load humanize %}
+
+{% block title %}Shopping Cart — LuxWatch{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1>Shopping <em>Cart</em></h1>
+        <p>{{ cart.total_items }} item{{ cart.total_items|pluralize }} in your cart</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        {% if items %}
+        <div class="cart-layout">
+            <div class="cart-items">
+                {% for item in items %}
+                <div class="cart-item" data-item-id="{{ item.id }}">
+                    <div class="cart-item-image">
+                        {% if item.watch.image %}
+                        <img src="{{ item.watch.image.url }}" alt="{{ item.watch.name }}">
+                        {% else %}
+                        <div class="watch-placeholder-sm"><i class="fas fa-clock"></i></div>
+                        {% endif %}
+                    </div>
+                    <div class="cart-item-details">
+                        <span class="cart-item-brand">{{ item.watch.brand.name }}</span>
+                        <a href="{{ item.watch.get_absolute_url }}" class="cart-item-name">{{ item.watch.name }}</a>
+                        <span class="cart-item-ref">Ref: {{ item.watch.reference_number|default:"—" }}</span>
+                    </div>
+                    <div class="cart-item-quantity">
+                        <form method="POST" action="{% url 'cart:update_cart' item.id %}" class="qty-form">
+                            {% csrf_token %}
+                            <button type="button" class="qty-btn" onclick="updateQty(this, -1)">−</button>
+                            <input type="number" name="quantity" value="{{ item.quantity }}" min="1"
+                                max="{{ item.watch.stock }}" class="qty-input" onchange="this.form.submit()">
+                            <button type="button" class="qty-btn" onclick="updateQty(this, 1)">+</button>
+                        </form>
+                    </div>
+                    <div class="cart-item-price">
+                        <span class="line-total">₹{{ item.line_total|floatformat:0|intcomma }}</span>
+                        <span class="unit-price">₹{{ item.watch.price|floatformat:0|intcomma }} each</span>
+                    </div>
+                    <a href="{% url 'cart:remove_from_cart' item.id %}" class="cart-item-remove" title="Remove">
+                        <i class="fas fa-trash-alt"></i>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="cart-summary">
+                <h3>Order Summary</h3>
+                <div class="summary-row"><span>Subtotal</span><span>₹{{ cart.subtotal|floatformat:0|intcomma }}</span>
+                </div>
+                <div class="summary-row"><span>GST (18%)</span><span>₹{{ cart.tax|floatformat:0|intcomma }}</span></div>
+                <div class="summary-row"><span>Shipping</span><span class="text-gold">Free</span></div>
+                <div class="summary-divider"></div>
+                <div class="summary-row summary-total"><span>Total</span><span>₹{{ cart.total|floatformat:0|intcomma
+                        }}</span></div>
+                <a href="{% url 'cart:checkout' %}" class="btn btn-gold btn-full btn-lg">
+                    <i class="fas fa-lock"></i> Proceed to Checkout
+                </a>
+                <a href="{% url 'store:watch_list' %}" class="btn btn-outline btn-full"
+                    style="margin-top:10px;">Continue Shopping</a>
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-shopping-bag"></i>
+            <h3>Your cart is empty</h3>
+            <p>Looks like you haven't added any watches to your collection yet.</p>
+            <a href="{% url 'store:watch_list' %}" class="btn btn-gold">Start Shopping</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<script>
+    function updateQty(btn, delta) {
+        const form = btn.closest('form');
+        const input = form.querySelector('.qty-input');
+        let val = parseInt(input.value) + delta;
+        if (val < 1) val = 1;
+        if (val > parseInt(input.max)) val = parseInt(input.max);
+        input.value = val;
+        form.submit();
+    }
+</script>
+{% endblock %}
